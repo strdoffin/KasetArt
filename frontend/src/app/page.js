@@ -4,27 +4,37 @@ import { useEffect, useState } from "react";
 export default function DailyAverages() {
     const [latestData, setLatestData] = useState(null);
     const [dailyAverages, setDailyAverages] = useState([]);
+    const [error, setError] = useState(null);
+
+    // Determine the correct base URL based on environment
+    const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
     useEffect(() => {
-        // Fetch latest data
         const fetchLatestData = async () => {
             try {
-                const res = await fetch("http://localhost:3000/data");
+                const res = await fetch(`${BASE_URL}/data`);
+                if (!res.ok) {
+                    throw new Error('Failed to fetch latest data');
+                }
                 const data = await res.json();
                 setLatestData(data);
             } catch (err) {
                 console.error("Error fetching latest data:", err);
+                setError('Could not fetch latest sensor data');
             }
         };
 
-        // Fetch daily averages
         const fetchDailyAverages = async () => {
             try {
-                const res = await fetch("http://localhost:3000/daily-averages");
+                const res = await fetch(`${BASE_URL}/daily-averages`);
+                if (!res.ok) {
+                    throw new Error('Failed to fetch daily averages');
+                }
                 const data = await res.json();
                 setDailyAverages(data);
             } catch (err) {
                 console.error("Error fetching daily averages:", err);
+                setError('Could not fetch daily averages');
             }
         };
 
@@ -32,7 +42,7 @@ export default function DailyAverages() {
         fetchLatestData();
         fetchDailyAverages();
 
-        // Set up polling
+        // Set up intervals
         const latestDataInterval = setInterval(fetchLatestData, 5000);
         const dailyAveragesInterval = setInterval(fetchDailyAverages, 60000);
 
@@ -42,6 +52,10 @@ export default function DailyAverages() {
             clearInterval(dailyAveragesInterval);
         };
     }, []);
+
+    if (error) {
+        return <div className="text-red-500">{error}</div>;
+    }
 
     return (
         <div className="p-4">
@@ -54,7 +68,6 @@ export default function DailyAverages() {
                     <p>Humidity: {latestData.humi}%</p>
                 </div>
             )}
-
             <h2 className="text-xl font-semibold mb-2">Daily Averages</h2>
             <table className="w-full border-collapse">
                 <thead>

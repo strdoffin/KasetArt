@@ -7,7 +7,16 @@ const { createClient } = require('@supabase/supabase-js');
 const app = express();
 const port = 3000;
 
-app.use(cors());
+
+app.use(cors({
+    origin: [
+        'http://localhost:3000',  // Next.js default dev server
+        'http://localhost:3001',  // Alternative port
+        // Add any other potential origins
+    ],
+    methods: ['GET', 'POST', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 // Supabase configuration
