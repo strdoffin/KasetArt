@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 import Footer from './../../components/footer';
-
+import GridStatusDisplay from './../../components/gridlive';
 export default function Home() {
     const [latestData, setLatestData] = useState(null);
     const [dailyAverages, setDailyAverages] = useState([]);
@@ -191,6 +191,7 @@ export default function Home() {
                         </div>
                     </div>
                 </div>
+                <GridStatusDisplay initialData={latestData}/>
                 <Footer />
             </div>
         </div>
