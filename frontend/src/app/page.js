@@ -7,9 +7,11 @@ export default function Home() {
     const [latestData, setLatestData] = useState(null);
     const [dailyAverages, setDailyAverages] = useState([]);
     const [loading, setLoading] = useState(true);
-
-    const BASE_URL = process.env.NEXT_PUBLIC_API_URL
-
+    if (process.env.NODE_ENV !== "production") {
+        const BASE_URL = "http://localhost:3000";
+    } else {
+        const BASE_URL = process.env.NEXT_PUBLIC_API_URL
+    }
     const fetchLatestData = async () => {
         try {
             const res = await fetch(`${BASE_URL}/data`);
