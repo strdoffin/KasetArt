@@ -168,7 +168,6 @@ const FullPageGrid = ({ initialData }) => {
               <span className="text-sm text-gray-500">Grid dimensions: {gridSize} × {gridSize}</span>
             </div>
           </div>
-          
           <button 
             onClick={() => router.push('/')}
             className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition"

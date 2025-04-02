@@ -138,12 +138,15 @@ const GridSizeSelector = ({ initialData }) => {
           </div>
         </div>
         
-        <button 
-          onClick={navigateToFullPageGrid}
-          className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
-        >
-          Go to Full Page Grid
-        </button>
+        <div>
+            <button 
+            onClick={navigateToFullPageGrid}
+            className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
+            >
+            Go to Full Page Grid
+            </button>
+            <p className='text-xs text-center text-gray-400 mt-2'>recommend for computer</p>
+        </div>
       </div>
       
       <div className="mb-4">
