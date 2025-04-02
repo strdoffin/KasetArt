@@ -1,7 +1,13 @@
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
-const GridStatusDisplay = ({ initialData }) => {
+const GridSizeSelector = ({ initialData }) => {
+  const router = useRouter();
+  // State for grid size (1x1 to 6x6)
+  const [gridSize, setGridSize] = useState(2);
+  
+  // Initial data structure with default 2x2 grid
   const [gridData, setGridData] = useState(initialData || {
     "normal_cnt": 2, 
     "rot_cnt": 2,
@@ -13,12 +19,12 @@ const GridStatusDisplay = ({ initialData }) => {
     ]
   });
   
-  // Create a 2x2 grid with default "none" status
-  const createGrid = (data) => {
+  // Create a dynamic grid with default "none" status
+  const createGrid = (data, size) => {
     const grid = [];
-    for (let y = 0; y < 2; y++) {
+    for (let y = 0; y < size; y++) {
       const row = [];
-      for (let x = 0; x < 2; x++) {
+      for (let x = 0; x < size; x++) {
         // Default status is "none"
         row.push({ x, y, status: "none" });
       }
@@ -28,7 +34,7 @@ const GridStatusDisplay = ({ initialData }) => {
     // Update grid with positions from payload
     if (data.position && Array.isArray(data.position)) {
       data.position.forEach(pos => {
-        if (pos.x >= 0 && pos.x < 2 && pos.y >= 0 && pos.y < 2) {
+        if (pos.x >= 0 && pos.x < size && pos.y >= 0 && pos.y < size) {
           grid[pos.y][pos.x].status = pos.status || "none";
         }
       });
@@ -61,7 +67,25 @@ const GridStatusDisplay = ({ initialData }) => {
     }
   }, [initialData]);
   
-  const grid = createGrid(gridData);
+  // Handle grid size change
+  const handleGridSizeChange = (e) => {
+    const newSize = parseInt(e.target.value, 10);
+    setGridSize(newSize);
+    
+    // Reset grid data for new size
+    setGridData({
+      "normal_cnt": 0,
+      "rot_cnt": 0,
+      "position": []
+    });
+  };
+  
+  // Navigate to full page grid view
+  const navigateToFullPageGrid = () => {
+    router.push('/fullpagegrid');
+  };
+  
+  const grid = createGrid(gridData, gridSize);
   const cellCounts = countCellTypes(grid);
   
   // Function to get styling based on status
@@ -93,9 +117,37 @@ const GridStatusDisplay = ({ initialData }) => {
   };
   
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md mb-8">
+    <div className="bg-white p-6 rounded-lg shadow-md">
+      <div className="mb-6 flex justify-between items-start">
+        <div>
+          <label className="block text-gray-700 text-sm font-medium mb-2" htmlFor="gridSize">
+            Select Grid Size:
+          </label>
+          <div className="flex items-center gap-4">
+            <select
+              id="gridSize"
+              value={gridSize}
+              onChange={handleGridSizeChange}
+              className="block w-40 py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+            >
+              {[...Array(6)].map((_, i) => (
+                <option key={i} value={i + 1}>{`${i + 1}x${i + 1}`}</option>
+              ))}
+            </select>
+            <span className="text-sm text-gray-500">Grid dimensions: {gridSize} × {gridSize}</span>
+          </div>
+        </div>
+        
+        <button 
+          onClick={navigateToFullPageGrid}
+          className="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition"
+        >
+          Go to Full Page Grid
+        </button>
+      </div>
+      
       <div className="mb-4">
-        <div className="flex space-x-6">
+        <div className="flex flex-wrap gap-4">
           <div className="flex items-center">
             <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
             <span className="text-sm text-gray-700">Normal cells: {cellCounts.normal}</span>
@@ -111,32 +163,35 @@ const GridStatusDisplay = ({ initialData }) => {
         </div>
       </div>
       
-      <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-        <div className="grid grid-cols-2 gap-3 h-96">
-          {grid.map((row, y) => 
-            row.map((cell, x) => {
-              const styles = getStatusStyles(cell.status);
-              return (
-                <div 
-                  key={`${x}-${y}`} 
-                  className={`h-full w-full flex items-center justify-center rounded-lg ${styles.bg} border ${styles.border}`}
-                >
-                  <div className="text-center">
-                    <div className={`text-xs font-medium ${styles.text}`}>
-                      ({x},{y})
-                    </div>
-                    <div className={`text-xs ${styles.subtext}`}>
-                      {cell.status}
+      <div className="bg-gray-50 p-4 rounded-lg border border-gray-100 overflow-auto">
+        <div className="max-w-2xl mx-auto">
+          {grid.map((row, y) => (
+            <div key={`row-${y}`} className="flex">
+              {row.map((cell, x) => {
+                const styles = getStatusStyles(cell.status);
+                return (
+                  <div 
+                    key={`${x}-${y}`} 
+                    className={`aspect-square flex items-center justify-center rounded-lg ${styles.bg} border ${styles.border} m-1`}
+                    style={{ width: `calc((100% - ${gridSize * 7}px) / ${gridSize})` }}
+                  >
+                    <div className="text-center">
+                      <div className={`text-xs font-medium ${styles.text}`}>
+                        ({x},{y})
+                      </div>
+                      <div className={`text-xs ${styles.subtext}`}>
+                        {cell.status}
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })
-          )}
+                );
+              })}
+            </div>
+          ))}
         </div>
       </div>
     </div>
   );
 };
 
-export default GridStatusDisplay;
+export default GridSizeSelector;
