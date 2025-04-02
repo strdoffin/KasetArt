@@ -1,14 +1,19 @@
 'use client';
 import { useEffect, useState } from "react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
+
 import Footer from './../../components/footer';
 import GridStatusDisplay from './../../components/gridlive';
+import Linegraph from './../../components/linegraph';
 export default function Home() {
     const [latestData, setLatestData] = useState(null);
     const [dailyAverages, setDailyAverages] = useState([]);
     const [loading, setLoading] = useState(true);
-
-    const BASE_URL = process.env.NEXT_PUBLIC_API_URL||"http://localhost:3000"
+    let BASE_URL = null;
+    if(process.env.NODE_ENV === 'production') {
+        BASE_URL = process.env.NEXT_PUBLIC_API_URL
+    } else {
+        BASE_URL = "http://localhost:3000"
+    }
 
     const fetchLatestData = async () => {
         try {
@@ -28,7 +33,7 @@ export default function Home() {
     
     const fetchDailyAverages = async () => {
         try {
-            const response = await fetch(`${BASE_URL}/daily-averages`);
+            const response = await fetch(`${BASE_URL}/dailyavg`);
             
             if (!response.ok) {
                 // throw new Error(`Failed to fetch daily averages: ${response.status}`);
@@ -53,7 +58,6 @@ export default function Home() {
             clearInterval(dailyAveragesInterval);
         };
     }, [BASE_URL]);
-
     return (
         <div className="bg-gradient-to-br from-blue-50 to-indigo-50 min-h-screen py-8 px-4 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
@@ -161,36 +165,7 @@ export default function Home() {
                         </table>
                     </div>
                 </div>
-                <div className="bg-white p-6 rounded-lg shadow-md mb-8">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <h2 className="text-xl font-semibold text-gray-800 mb-4">Temperature Over Time</h2>
-                            <ResponsiveContainer width="100%" height={300}>
-                                <LineChart data={dailyAverages}>
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="date" />
-                                    <YAxis />
-                                    <Tooltip />
-                                    <Legend />
-                                    <Line type="monotone" dataKey="avg_temp" stroke="#8884d8" activeDot={{ r: 8 }} />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        </div>
-                        <div>
-                            <h2 className="text-xl font-semibold text-gray-800 mb-4">Humidity Over Time</h2>
-                            <ResponsiveContainer width="100%" height={300}>
-                                <LineChart data={dailyAverages}>
-                                    <CartesianGrid strokeDasharray="3 3" />
-                                    <XAxis dataKey="date" />
-                                    <YAxis />
-                                    <Tooltip />
-                                    <Legend />
-                                    <Line type="monotone" dataKey="avg_humi" stroke="#82ca9d" activeDot={{ r: 8 }} />
-                                </LineChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-                </div>
+                <Linegraph data={dailyAverages}/>            
                 <GridStatusDisplay initialData={latestData}/>
                 <Footer />
             </div>
